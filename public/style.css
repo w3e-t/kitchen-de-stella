@@ -364,3 +364,64 @@ body {
     padding: 1.2rem;
   }
 }
+
+
+
+/* Contact & Social Links */
+.contact-info-block {
+  margin-top: 1.5rem;
+}
+
+.contact-heading {
+  font-weight: 700;
+  margin-bottom: 0.8rem;
+  color: #2f3542;
+}
+
+.contact-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.contact-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  background: #f1f2f6;
+  color: #333;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: transform 0.2s, background 0.3s, color 0.3s;
+}
+
+.contact-item:hover {
+  transform: translateY(-2px);
+}
+
+.contact-item.whatsapp:hover {
+  background: #25d366;
+  color: #fff;
+}
+
+.contact-item.phone:hover {
+  background: #2ed573;
+  color: #fff;
+}
+
+.contact-item.facebook:hover {
+  background: #1877f2;
+  color: #fff;
+}
+
+.contact-item.instagram:hover {
+  background: #e1306c;
+  color: #fff;
+}
+
+.contact-item i {
+  font-size: 1.2rem;
+}
