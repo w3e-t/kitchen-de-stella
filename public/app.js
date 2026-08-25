@@ -97,7 +97,6 @@ function toggleAuthModal() {
   const modal = document.getElementById('auth-modal');
   modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
 }
-
 function switchAuthTab(type) {
   const loginForm = document.getElementById('login-form');
   const regForm = document.getElementById('register-form');
@@ -106,11 +105,11 @@ function switchAuthTab(type) {
   if (type === 'register') {
     loginForm.style.display = 'none';
     regForm.style.display = 'block';
-    title.innerText = 'Create Customer Account';
+    title.innerText = 'Login / Create an Account';
   } else {
     regForm.style.display = 'none';
     loginForm.style.display = 'block';
-    title.innerText = 'Customer Login';
+    title.innerText = 'Login / Create an Account';
   }
 }
 
