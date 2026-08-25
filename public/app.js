@@ -5,13 +5,25 @@ let currentUser = JSON.parse(localStorage.getItem('stella_user')) || null;
 document.addEventListener('DOMContentLoaded', () => {
   fetchMenu();
   updateAuthUI();
+
+  // Automatically load "All" items if the user is already logged in
+  if (currentUser) {
+    filterMenu('All');
+  } else {
+    // Hide menu items and display a login prompt when logged out
+    const menuGrid = document.getElementById('menu-grid');
+    if (menuGrid) {
+      menuGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; font-weight: 600; padding: 2rem;">Please log in to view our special menu!</p>';
+    }
+  }
 });
 
 function updateAuthUI() {
   const container = document.getElementById('auth-nav-container');
   if (currentUser) {
     if (currentUser.phone === '024XXXXXXX') {
-      document.getElementById('customer-phone').value = currentUser.phone;
+      const phoneInput = document.getElementById('customer-phone');
+      if (phoneInput) phoneInput.value = currentUser.phone;
     }
     container.innerHTML = `
       <span class="user-welcome">Hi, ${currentUser.fullname.split(' ')[0]}</span>
@@ -29,7 +41,7 @@ async function fetchMenu() {
   try {
     const response = await fetch('/api/menu');
     allMenuItems = await response.json();
-    renderMenu(allMenuItems);
+    // Do not auto-render here so items remain hidden until logged in/requested
   } catch (error) {
     console.error('Error fetching menu:', error);
   }
@@ -37,6 +49,7 @@ async function fetchMenu() {
 
 function renderMenu(items) {
   const menuGrid = document.getElementById('menu-grid');
+  if (!menuGrid) return;
   menuGrid.innerHTML = '';
 
   items.forEach(item => {
@@ -56,10 +69,21 @@ function renderMenu(items) {
   });
 }
 
-function filterMenu(category) {
-  document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-  event.target.classList.add('active');
+function filterMenu(category, e) {
+  // 1. Block guests and prompt for login
+  if (!currentUser) {
+    alert('Please log in or create an account to view our menu and place orders!');
+    toggleAuthModal();
+    return;
+  }
 
+  // 2. Update active tab styling
+  if (e && e.target && e.target.classList.contains('filter-btn')) {
+    document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+    e.target.classList.add('active');
+  }
+
+  // 3. Render items
   if (category === 'All') {
     renderMenu(allMenuItems);
   } else {
@@ -105,7 +129,6 @@ async function handleLogin(e) {
 
     if (res.ok) {
       if (data.user.role === 'admin') {
-        // Save admin password so admin API endpoints approve access
         localStorage.setItem('adminPasscode', password);
         localStorage.setItem('stella_user', JSON.stringify(data.user));
         window.location.href = '/admin.html';
@@ -115,6 +138,10 @@ async function handleLogin(e) {
       localStorage.setItem('stella_user', JSON.stringify(currentUser));
       updateAuthUI();
       toggleAuthModal();
+      
+      // Auto-display menu upon login
+      filterMenu('All');
+
       alert(`Welcome back, ${currentUser.fullname}!`);
     } else {
       alert(data.error);
@@ -143,6 +170,10 @@ async function handleRegister(e) {
       localStorage.setItem('stella_user', JSON.stringify(currentUser));
       updateAuthUI();
       toggleAuthModal();
+
+      // Auto-display menu upon registration
+      filterMenu('All');
+
       alert('Account registered successfully!');
     } else {
       alert(data.error);
@@ -157,6 +188,12 @@ function handleLogout() {
   localStorage.removeItem('stella_user');
   localStorage.removeItem('adminPasscode');
   updateAuthUI();
+
+  // Reset menu grid view on logout
+  const menuGrid = document.getElementById('menu-grid');
+  if (menuGrid) {
+    menuGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; font-weight: 600; padding: 2rem;">Please log in to view our special menu!</p>';
+  }
 }
 
 // User Orders History Modal
@@ -226,8 +263,10 @@ function updateCartUI() {
   const totalQuantity = cart.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
-  cartCount.innerText = totalQuantity;
-  cartTotalSpan.innerText = totalPrice.toFixed(2);
+  if (cartCount) cartCount.innerText = totalQuantity;
+  if (cartTotalSpan) cartTotalSpan.innerText = totalPrice.toFixed(2);
+
+  if (!cartItemsDiv) return;
 
   if (cart.length === 0) {
     cartItemsDiv.innerHTML = '<p style="text-align:center; padding: 1rem;">Your cart is empty.</p>';
