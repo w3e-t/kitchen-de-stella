@@ -6,7 +6,7 @@ const path = require('path');
 const axios = require('axios');
 const bcrypt = require('bcryptjs');
 const rateLimit = require('express-rate-limit');
-const db = require('./database');
+const { getDb, saveDatabase } = require('./database');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -42,19 +42,42 @@ app.post('/api/auth/register', async (req, res) => {
   }
 
   try {
+    const db = getDb();
+    
+    // Check if phone number already exists
+    const checkStmt = db.prepare('SELECT id FROM users WHERE phone = ?');
+    checkStmt.bind([phone]);
+    const exists = checkStmt.step();
+    checkStmt.free();
+
+    if (exists) {
+      return res.status(400).json({ error: 'Phone number already registered. Please login.' });
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
-    const stmt = db.prepare(`INSERT INTO users (fullname, phone, password, role) VALUES (?, ?, ?, 'customer')`);
-    const info = stmt.run(fullname, phone, hashedPassword);
+    
+    // Insert new user
+    db.run(
+      `INSERT INTO users (fullname, phone, password, role) VALUES (?, ?, ?, 'customer')`,
+      [fullname, phone, hashedPassword]
+    );
+
+    // Fetch the new user's ID
+    const resStmt = db.prepare('SELECT last_insert_rowid() AS id');
+    resStmt.step();
+    const newId = resStmt.getAsObject().id;
+    resStmt.free();
+
+    // Persist changes to file
+    saveDatabase();
 
     res.status(201).json({
       message: 'Account created successfully!',
-      user: { id: info.lastInsertRowid, fullname, phone, role: 'customer' }
+      user: { id: newId, fullname, phone, role: 'customer' }
     });
   } catch (err) {
-    if (err.message && err.message.includes('UNIQUE constraint failed')) {
-      return res.status(400).json({ error: 'Phone number already registered. Please login.' });
-    }
-    res.status(500).json({ error: 'Server error during registration.' });
+    console.error('Registration Error:', err);
+    res.status(500).json({ error: err.message || 'Server error during registration.' });
   }
 });
 
@@ -76,8 +99,17 @@ app.post('/api/auth/login', loginLimiter, async (req, res) => {
 
   // Customer Login Check
   try {
-    const user = db.prepare('SELECT * FROM users WHERE phone = ?').get(phone);
-    if (!user) return res.status(400).json({ error: 'Invalid phone number or password.' });
+    const db = getDb();
+    const stmt = db.prepare('SELECT * FROM users WHERE phone = ?');
+    stmt.bind([phone]);
+    
+    if (!stmt.step()) {
+      stmt.free();
+      return res.status(400).json({ error: 'Invalid phone number or password.' });
+    }
+
+    const user = stmt.getAsObject();
+    stmt.free();
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ error: 'Invalid phone number or password.' });
@@ -95,7 +127,16 @@ app.post('/api/auth/login', loginLimiter, async (req, res) => {
 app.get('/api/user/orders/:userId', (req, res) => {
   const { userId } = req.params;
   try {
-    const rows = db.prepare('SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC').all(userId);
+    const db = getDb();
+    const stmt = db.prepare('SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC');
+    stmt.bind([userId]);
+    
+    const rows = [];
+    while (stmt.step()) {
+      rows.push(stmt.getAsObject());
+    }
+    stmt.free();
+
     res.json(rows);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -105,7 +146,15 @@ app.get('/api/user/orders/:userId', (req, res) => {
 // Fetch Menu
 app.get('/api/menu', (req, res) => {
   try {
-    const rows = db.prepare('SELECT * FROM menu').all();
+    const db = getDb();
+    const stmt = db.prepare('SELECT * FROM menu');
+    
+    const rows = [];
+    while (stmt.step()) {
+      rows.push(stmt.getAsObject());
+    }
+    stmt.free();
+
     res.json(rows);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -142,16 +191,21 @@ app.post('/api/order', (req, res) => {
   const itemsString = JSON.stringify(items);
   const payment_status = payment_method === 'Paystack (Mobile Money)' ? 'Paid (Online)' : 'Pending (Pay on Delivery)';
 
-  const query = `
-    INSERT INTO orders (user_id, customer_phone, delivery_location, fulfillment_type, branch, payment_method, payment_status, items, total_amount)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `;
-
   try {
-    const stmt = db.prepare(query);
-    const info = stmt.run(user_id || null, customer_phone, delivery_location, fulfillment_type, branch, payment_method, payment_status, itemsString, total_amount);
+    const db = getDb();
+    db.run(
+      `INSERT INTO orders (user_id, customer_phone, delivery_location, fulfillment_type, branch, payment_method, payment_status, items, total_amount)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [user_id || null, customer_phone, delivery_location, fulfillment_type, branch, payment_method, payment_status, itemsString, total_amount]
+    );
 
-    const newOrderId = info.lastInsertRowid;
+    const resStmt = db.prepare('SELECT last_insert_rowid() AS id');
+    resStmt.step();
+    const newOrderId = resStmt.getAsObject().id;
+    resStmt.free();
+
+    saveDatabase();
+
     sendAdminSMS({ orderId: newOrderId, customer_phone, delivery_location, fulfillment_type, branch, items, total_amount });
 
     res.status(201).json({ message: 'Order placed successfully!', orderId: newOrderId });
@@ -167,7 +221,15 @@ app.get('/api/admin/orders', (req, res) => {
   }
 
   try {
-    const rows = db.prepare('SELECT * FROM orders ORDER BY created_at DESC').all();
+    const db = getDb();
+    const stmt = db.prepare('SELECT * FROM orders ORDER BY created_at DESC');
+    
+    const rows = [];
+    while (stmt.step()) {
+      rows.push(stmt.getAsObject());
+    }
+    stmt.free();
+
     res.json(rows);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -184,7 +246,9 @@ app.patch('/api/admin/orders/:id', (req, res) => {
   const { id } = req.params;
 
   try {
-    db.prepare('UPDATE orders SET order_status = ? WHERE id = ?').run(order_status, id);
+    const db = getDb();
+    db.run('UPDATE orders SET order_status = ? WHERE id = ?', [order_status, id]);
+    saveDatabase();
     res.json({ message: 'Order status updated successfully' });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -203,9 +267,16 @@ app.post('/api/admin/menu', (req, res) => {
   }
 
   try {
-    const stmt = db.prepare('INSERT INTO menu (name, category, price, image) VALUES (?, ?, ?, ?)');
-    const info = stmt.run(name, category, price, image);
-    res.status(201).json({ message: 'Menu item added successfully!', id: info.lastInsertRowid });
+    const db = getDb();
+    db.run('INSERT INTO menu (name, category, price, image) VALUES (?, ?, ?, ?)', [name, category, price, image]);
+    
+    const resStmt = db.prepare('SELECT last_insert_rowid() AS id');
+    resStmt.step();
+    const newId = resStmt.getAsObject().id;
+    resStmt.free();
+
+    saveDatabase();
+    res.status(201).json({ message: 'Menu item added successfully!', id: newId });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -220,14 +291,14 @@ app.delete('/api/admin/orders', (req, res) => {
   const { target } = req.query;
 
   try {
-    let stmt;
+    const db = getDb();
     if (target === 'completed') {
-      stmt = db.prepare("DELETE FROM orders WHERE order_status = 'Delivered' OR order_status = 'Completed'");
+      db.run("DELETE FROM orders WHERE order_status = 'Delivered' OR order_status = 'Completed'");
     } else {
-      stmt = db.prepare('DELETE FROM orders');
+      db.run('DELETE FROM orders');
     }
-    const info = stmt.run();
-    res.json({ message: `Successfully cleared ${info.changes} order record(s).` });
+    saveDatabase();
+    res.json({ message: `Successfully cleared order record(s).` });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -240,12 +311,10 @@ app.post('/api/admin/reset-db', (req, res) => {
   }
 
   try {
-    const resetTransaction = db.transaction(() => {
-      db.prepare('DELETE FROM orders').run();
-      db.prepare("DELETE FROM users WHERE role != 'admin'").run();
-    });
-
-    resetTransaction();
+    const db = getDb();
+    db.run('DELETE FROM orders');
+    db.run("DELETE FROM users WHERE role != 'admin'");
+    saveDatabase();
     res.json({ message: 'Database reset successfully. All customer orders and accounts cleared.' });
   } catch (err) {
     res.status(500).json({ error: err.message });
