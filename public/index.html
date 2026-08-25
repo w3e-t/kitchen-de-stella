@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kitchen De Stella | Afienya</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <header class="navbar">
+    <div class="logo">Kitchen De Stella 🍲</div>
+    <nav>
+      <a href="#menu">Menu</a>
+      <a href="#about">About Us</a>
+      <span id="auth-nav-container">
+        <button class="nav-auth-btn" onclick="toggleAuthModal()">Login / Register</button>
+      </span>
+      <button class="cart-btn" onclick="toggleCartModal()">
+        🛒 Cart (<span id="cart-count">0</span>)
+      </button>
+    </nav>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-content">
+      <h1>Delicious Local & Continental Dishes in Afienya</h1>
+      <p>Order fresh meals & chilled soft drinks directly to your doorstep or pick up at your convenience!</p>
+      <a href="#menu" class="cta-btn">Order Now</a>
+    </div>
+  </section>
+
+  <!-- Menu Section -->
+  <section id="menu" class="menu-section">
+    <h2>Our Special Menu</h2>
+    
+    <div class="filter-buttons">
+      <button class="filter-btn active" onclick="filterMenu('All')">All</button>
+      <button class="filter-btn" onclick="filterMenu('Food')">Foods</button>
+      <button class="filter-btn" onclick="filterMenu('Drink')">Drinks</button>
+    </div>
+
+    <div class="menu-grid" id="menu-grid"></div>
+  </section>
+
+  <!-- About Us Section -->
+  <section id="about" class="about-section">
+    <div class="about-card">
+      <h2>About Kitchen De Stella</h2>
+      <p>Kitchen De Stella brings rich local Ghanaian favorites and continental specialties straight to your plate. Known for our rich flavors and quick service, we operate across two prime locations in Afienya to serve you best.</p>
+      
+      <h3>Our Afienya Branches</h3>
+      <ul class="branch-list">
+        <li>📍 <strong>Branch 1:</strong> Star Oil Filling Station, Afienya</li>
+        <li>📍 <strong>Branch 2:</strong> Goil Filling Station, Afienya</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Login / Register Modal -->
+  <div class="modal-overlay" id="auth-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="auth-modal-title">Customer Login</h2>
+        <span class="close-btn" onclick="toggleAuthModal()">&times;</span>
+      </div>
+
+      <!-- Login Form -->
+      <form id="login-form" onsubmit="handleLogin(event)" style="margin-top: 1rem;">
+        <div class="form-group">
+          <label>Phone Number (or 'admin'):</label>
+          <input type="text" id="login-phone" placeholder="e.g. 024XXXXXXX or admin" required>
+        </div>
+        <div class="form-group">
+          <label>Password:</label>
+          <input type="password" id="login-password" required>
+        </div>
+        <button type="submit" class="submit-order-btn">Log In</button>
+        <p style="margin-top: 1rem; text-align: center;">Don't have an account? <a href="#" onclick="switchAuthTab('register')">Create Account</a></p>
+      </form>
+
+      <!-- Register Form -->
+      <form id="register-form" onsubmit="handleRegister(event)" style="margin-top: 1rem; display: none;">
+        <div class="form-group">
+          <label>Full Name:</label>
+          <input type="text" id="reg-name" placeholder="John Doe" required>
+        </div>
+        <div class="form-group">
+          <label>Phone Number:</label>
+          <input type="tel" id="reg-phone" placeholder="024XXXXXXX" required>
+        </div>
+        <div class="form-group">
+          <label>Password:</label>
+          <input type="password" id="reg-password" required>
+        </div>
+        <button type="submit" class="submit-order-btn" style="background: #2ed573;">Register Account</button>
+        <p style="margin-top: 1rem; text-align: center;">Already have an account? <a href="#" onclick="switchAuthTab('login')">Log In</a></p>
+      </form>
+    </div>
+  </div>
+
+  <!-- My Orders Modal -->
+  <div class="modal-overlay" id="orders-modal">
+    <div class="modal-content" style="max-width: 600px;">
+      <div class="modal-header">
+        <h2>My Order History</h2>
+        <span class="close-btn" onclick="toggleOrdersModal()">&times;</span>
+      </div>
+      <div id="user-orders-list" style="padding: 1rem 0;"></div>
+    </div>
+  </div>
+
+  <!-- Cart Modal -->
+  <div class="modal-overlay" id="cart-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Your Shopping Cart</h2>
+        <span class="close-btn" onclick="toggleCartModal()">&times;</span>
+      </div>
+
+      <div class="cart-body" id="cart-items"></div>
+
+      <div class="cart-footer">
+        <h3>Total: GH₵ <span id="cart-total">0.00</span></h3>
+        
+        <form id="checkout-form" onsubmit="submitOrder(event)">
+          <h4>Order & Delivery Details</h4>
+          
+          <div class="form-group">
+            <label>Select Branch:</label>
+            <select id="branch-select" required>
+              <option value="Star Oil Branch (Afienya)">Star Oil Branch (Afienya)</option>
+              <option value="Goil Branch (Afienya)">Goil Branch (Afienya)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Fulfillment Method:</label>
+            <select id="fulfillment-select" required>
+              <option value="Delivery">Pay on Delivery</option>
+              <option value="Pick-up">Pick Up at Branch</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Payment Method:</label>
+            <select id="payment-select" required>
+              <option value="Pay on Delivery">Pay on Delivery</option>
+              <option value="Paystack (Mobile Money)">Mobile Money (MTN / Telecel MoMo)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Phone Number (Active):</label>
+            <input type="tel" id="customer-phone" placeholder="e.g. 024XXXXXXX" required>
+          </div>
+
+          <div class="form-group">
+            <label>Delivery Location / Landmarks:</label>
+            <input type="text" id="delivery-location" placeholder="e.g. Afienya Last Stop, near Baptist Church" required>
+          </div>
+
+          <button type="submit" class="submit-order-btn">Confirm & Place Order</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

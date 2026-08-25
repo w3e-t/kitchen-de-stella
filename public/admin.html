@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kitchen De Stella | Admin Portal</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { background: #f1f2f6; color: #2f3542; padding: 2rem; }
+    .admin-container { max-width: 1100px; margin: 0 auto; }
+    .header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+    .orders-table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+    .orders-table th, .orders-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #ddd; }
+    .orders-table th { background: #ff4757; color: #fff; }
+    .status-select { padding: 5px; border-radius: 4px; }
+  </style>
+</head>
+<body>
+
+  <div class="admin-container">
+    <div class="header-bar">
+      <h1>Kitchen De Stella - Admin Dashboard 🍲</h1>
+      <button onclick="window.location.href='/'" style="padding: 8px 16px; background: #2f3542; color: #fff; border: none; border-radius: 4px; cursor: pointer;">Go to Site</button>
+    </div>
+
+    <!-- Add Item Form -->
+    <div style="background:#fff; padding:1.5rem; margin-bottom:2rem; border-radius:8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+      <h3>Add New Menu Item</h3>
+      <form id="add-item-form" onsubmit="addMenuItem(event)" style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top: 10px;">
+        <input type="text" id="item-name" placeholder="Item Name (e.g. Fufu & Goat)" required style="padding:8px;">
+        <select id="item-category" required style="padding:8px;">
+          <option value="Food">Food</option>
+          <option value="Drink">Drink</option>
+        </select>
+        <input type="number" step="0.01" id="item-price" placeholder="Price (GHc)" required style="padding:8px;">
+        <input type="text" id="item-image" placeholder="Image Filename (e.g. fufu.jpg)" required style="padding:8px;">
+        <button type="submit" style="grid-column: span 2; padding:10px; background:#2ed573; color:#fff; border:none; border-radius: 4px; cursor:pointer; font-weight: 600;">Add Item</button>
+      </form>
+    </div>
+
+    <!-- Orders Management -->
+    <h3>Customer Orders</h3>
+    <table class="orders-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Branch</th>
+          <th>Type</th>
+          <th>Phone</th>
+          <th>Location</th>
+          <th>Items</th>
+          <th>Total</th>
+          <th>Payment</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="admin-orders-body">
+        <tr><td colspan="9">Loading orders...</td></tr>
+      </tbody>
+    </table>
+
+    <!-- Admin Danger Zone -->
+    <section style="background: #fff; border: 2px solid #ff4757; border-radius: 8px; padding: 1.5rem; margin-top: 2.5rem; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+      <h3 style="color: #ff4757; margin-bottom: 0.5rem;">🚨 Danger Zone</h3>
+      <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">
+        Actions here are permanent. Please double-check before proceeding.
+      </p>
+
+      <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <button onclick="clearCompletedOrders()" style="background: #ffa502; color: #fff; border: none; padding: 10px 16px; border-radius: 5px; cursor: pointer; font-weight: 600;">
+          🧹 Clear Completed Orders
+        </button>
+        <button onclick="clearAllOrders()" style="background: #ff4757; color: #fff; border: none; padding: 10px 16px; border-radius: 5px; cursor: pointer; font-weight: 600;">
+          🗑️ Wipe All Order History
+        </button>
+        <button onclick="resetDatabase()" style="background: #2f3542; color: #fff; border: none; padding: 10px 16px; border-radius: 5px; cursor: pointer; font-weight: 600;">
+          ⚠️ Full Factory Reset (Clear All Data)
+        </button>
+      </div>
+    </section>
+  </div>
+
+  <script src="admin.js"></script>
+</body>
+</html>
