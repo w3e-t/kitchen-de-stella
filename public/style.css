@@ -9,6 +9,7 @@ body {
   background-color: #fdfbf7;
   color: #333;
   scroll-behavior: smooth;
+  overflow-x: hidden; /* Prevents horizontal scrollbar on small screens */
 }
 
 /* Navbar */
@@ -16,24 +17,32 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1.2rem 8%;
+  padding: 1rem 5%;
   background: #ff4757;
   color: #fff;
   position: sticky;
   top: 0;
   z-index: 100;
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  flex-wrap: wrap; /* Allows navigation items to wrap on phones */
+  gap: 10px;
 }
 
 .logo {
-  font-size: 1.6rem;
+  font-size: clamp(1.2rem, 4vw, 1.6rem);
   font-weight: 700;
+}
+
+.navbar nav {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .navbar nav a {
   color: #fff;
   text-decoration: none;
-  margin-right: 1.5rem;
   font-weight: 600;
   transition: color 0.3s;
 }
@@ -46,7 +55,7 @@ body {
   background: #ffa502;
   border: none;
   color: #fff;
-  padding: 0.6rem 1.2rem;
+  padding: 0.5rem 1rem;
   font-weight: 700;
   border-radius: 20px;
   cursor: pointer;
@@ -60,24 +69,24 @@ body {
 
 /* Hero Section */
 .hero {
-  height: 60vh;
+  min-height: 50vh;
   background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1200&q=80') center/cover;
   display: flex;
   justify-content: center;
   align-items: center;
   text-align: center;
   color: #fff;
-  padding: 0 20px;
+  padding: 2rem 1.5rem;
 }
 
 .hero h1 {
-  font-size: 2.8rem;
+  font-size: clamp(1.8rem, 5vw, 2.8rem);
   margin-bottom: 1rem;
   animation: fadeInDown 1s ease-in-out;
 }
 
 .hero p {
-  font-size: 1.2rem;
+  font-size: clamp(0.95rem, 3vw, 1.2rem);
   margin-bottom: 1.5rem;
 }
 
@@ -88,6 +97,7 @@ body {
   text-decoration: none;
   font-weight: 700;
   border-radius: 25px;
+  display: inline-block;
   transition: background 0.3s, transform 0.2s;
 }
 
@@ -98,26 +108,31 @@ body {
 
 /* Menu Section */
 .menu-section {
-  padding: 4rem 8%;
+  padding: 3rem 5%;
   text-align: center;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .menu-section h2 {
-  font-size: 2.2rem;
+  font-size: clamp(1.5rem, 4vw, 2.2rem);
   margin-bottom: 1.5rem;
   color: #2f3542;
 }
 
 .filter-buttons {
   margin-bottom: 2rem;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .filter-btn {
   background: #f1f2f6;
   border: 2px solid #ff4757;
   color: #ff4757;
-  padding: 0.5rem 1.5rem;
-  margin: 0 5px;
+  padding: 0.5rem 1.2rem;
   border-radius: 20px;
   font-weight: 600;
   cursor: pointer;
@@ -131,8 +146,8 @@ body {
 
 .menu-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
 }
 
 .card {
@@ -190,14 +205,16 @@ body {
 /* About Section */
 .about-section {
   background: #f1f2f6;
-  padding: 4rem 8%;
+  padding: 3rem 5%;
 }
 
 .about-card {
   background: #fff;
-  padding: 2.5rem;
+  padding: 1.8rem;
   border-radius: 12px;
   box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .about-card h2 {
@@ -216,7 +233,7 @@ body {
 
 .branch-list li {
   margin-bottom: 0.5rem;
-  font-size: 1.05rem;
+  font-size: 1rem;
 }
 
 /* Modal Overlay & Cart */
@@ -231,16 +248,17 @@ body {
   z-index: 200;
   justify-content: center;
   align-items: center;
+  padding: 1rem;
 }
 
 .modal-content {
   background: #fff;
-  width: 90%;
+  width: 100%;
   max-width: 500px;
   max-height: 90vh;
   border-radius: 12px;
   overflow-y: auto;
-  padding: 1.5rem;
+  padding: 1.2rem;
 }
 
 .modal-header {
@@ -295,6 +313,7 @@ body {
   padding: 0.6rem;
   border: 1px solid #ccc;
   border-radius: 6px;
+  width: 100%;
 }
 
 .submit-order-btn {
@@ -314,11 +333,10 @@ body {
   background: transparent;
   border: 2px solid #fff;
   color: #fff;
-  padding: 0.5rem 1rem;
+  padding: 0.4rem 0.8rem;
   font-weight: 600;
   border-radius: 20px;
   cursor: pointer;
-  margin-right: 1rem;
   transition: all 0.3s;
 }
 
@@ -330,5 +348,19 @@ body {
 .user-welcome {
   color: #fff;
   font-weight: 600;
-  margin-right: 1rem;
+}
+
+/* Mobile Adjustments */
+@media (max-width: 600px) {
+  .navbar {
+    padding: 0.8rem 4%;
+  }
+
+  .menu-grid {
+    grid-template-columns: 1fr; /* Single column cards on phone */
+  }
+
+  .about-card {
+    padding: 1.2rem;
+  }
 }
