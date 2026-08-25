@@ -6,14 +6,6 @@ const dbPath = path.resolve(__dirname, 'stella.db');
 
 let db;
 
-// Synchronous wrapper to ensure db is ready
-function getDb() {
-  if (!db) {
-    throw new Error('Database not initialized yet.');
-  }
-  return db;
-}
-
 function saveDatabase() {
   if (db) {
     const data = db.export();
@@ -22,8 +14,9 @@ function saveDatabase() {
   }
 }
 
-// Initialize SQLite database
-initSqlJs().then((SQL) => {
+async function initDatabase() {
+  const SQL = await initSqlJs();
+  
   if (fs.existsSync(dbPath)) {
     const filebuffer = fs.readFileSync(dbPath);
     db = new SQL.Database(filebuffer);
@@ -67,12 +60,12 @@ initSqlJs().then((SQL) => {
     );
   `);
 
-  // 2. Safe Auto-Migrations
+  // 2. Migrations
   try { db.run("ALTER TABLE orders ADD COLUMN user_id INTEGER DEFAULT NULL"); } catch (e) {}
   try { db.run("ALTER TABLE orders ADD COLUMN payment_status TEXT DEFAULT 'Pending'"); } catch (e) {}
   try { db.run("ALTER TABLE orders ADD COLUMN order_status TEXT DEFAULT 'Pending'"); } catch (e) {}
 
-  // 3. Seed Default Menu Items
+  // 3. Seed Menu
   const res = db.exec('SELECT COUNT(*) AS count FROM menu');
   const count = res.length > 0 && res[0].values.length > 0 ? res[0].values[0][0] : 0;
 
@@ -89,20 +82,17 @@ initSqlJs().then((SQL) => {
     ];
 
     const stmt = db.prepare('INSERT INTO menu (name, category, price, image) VALUES (?, ?, ?, ?)');
-    initialMenu.forEach((item) => {
-      stmt.run(item);
-    });
+    initialMenu.forEach((item) => stmt.run(item));
     stmt.free();
     saveDatabase();
-    console.log('Default menu seeded successfully.');
   }
 
-  console.log('Connected to pure JS SQLite database: stella.db');
-}).catch((err) => {
-  console.error('Failed to initialize database:', err);
-});
+  console.log('Database fully initialized and ready!');
+  return db;
+}
 
 module.exports = {
-  getDb,
+  initDatabase,
+  getDb: () => db,
   saveDatabase
 };

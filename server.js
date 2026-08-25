@@ -6,7 +6,7 @@ const path = require('path');
 const axios = require('axios');
 const bcrypt = require('bcryptjs');
 const rateLimit = require('express-rate-limit');
-const { getDb, saveDatabase } = require('./database');
+const { initDatabase, getDb, saveDatabase } = require('./database');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -15,7 +15,7 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Rate Limiter: Max 5 login attempts per 15 minutes per IP
+// Rate Limiter
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 5,
@@ -24,11 +24,10 @@ const loginLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-// Admin Authentication Helper
+// Admin Auth Helper
 const isValidAdmin = (req) => {
   const passcode = req.headers['x-admin-passcode'];
   const adminSecret = process.env.ADMIN_PASSCODE;
-  
   if (!adminSecret || !passcode) return false;
   return passcode === adminSecret;
 };
@@ -43,8 +42,8 @@ app.post('/api/auth/register', async (req, res) => {
 
   try {
     const db = getDb();
-    
-    // Check if phone number already exists
+
+    // Check existing phone
     const checkStmt = db.prepare('SELECT id FROM users WHERE phone = ?');
     checkStmt.bind([phone]);
     const exists = checkStmt.step();
@@ -55,20 +54,18 @@ app.post('/api/auth/register', async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    
-    // Insert new user
+
+    // Insert user
     db.run(
       `INSERT INTO users (fullname, phone, password, role) VALUES (?, ?, ?, 'customer')`,
       [fullname, phone, hashedPassword]
     );
 
-    // Fetch the new user's ID
     const resStmt = db.prepare('SELECT last_insert_rowid() AS id');
     resStmt.step();
     const newId = resStmt.getAsObject().id;
     resStmt.free();
 
-    // Persist changes to file
     saveDatabase();
 
     res.status(201).json({
@@ -81,12 +78,11 @@ app.post('/api/auth/register', async (req, res) => {
   }
 });
 
-// API 2: Login with Rate Limiting
+// API 2: Login
 app.post('/api/auth/login', loginLimiter, async (req, res) => {
   const { phone, password } = req.body;
   const adminSecret = process.env.ADMIN_PASSCODE;
 
-  // Admin Login Check
   if (phone === 'admin') {
     if (!adminSecret || password !== adminSecret) {
       return res.status(401).json({ error: 'Invalid admin credentials.' });
@@ -97,12 +93,11 @@ app.post('/api/auth/login', loginLimiter, async (req, res) => {
     });
   }
 
-  // Customer Login Check
   try {
     const db = getDb();
     const stmt = db.prepare('SELECT * FROM users WHERE phone = ?');
     stmt.bind([phone]);
-    
+
     if (!stmt.step()) {
       stmt.free();
       return res.status(400).json({ error: 'Invalid phone number or password.' });
@@ -123,14 +118,14 @@ app.post('/api/auth/login', loginLimiter, async (req, res) => {
   }
 });
 
-// API 3: Fetch Customer Specific Orders
+// API 3: Fetch Customer Orders
 app.get('/api/user/orders/:userId', (req, res) => {
   const { userId } = req.params;
   try {
     const db = getDb();
     const stmt = db.prepare('SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC');
     stmt.bind([userId]);
-    
+
     const rows = [];
     while (stmt.step()) {
       rows.push(stmt.getAsObject());
@@ -148,7 +143,7 @@ app.get('/api/menu', (req, res) => {
   try {
     const db = getDb();
     const stmt = db.prepare('SELECT * FROM menu');
-    
+
     const rows = [];
     while (stmt.step()) {
       rows.push(stmt.getAsObject());
@@ -161,7 +156,7 @@ app.get('/api/menu', (req, res) => {
   }
 });
 
-// Helper: SMS Alert
+// SMS Alert Helper
 async function sendAdminSMS(orderData) {
   const adminPhone = process.env.ADMIN_PHONE;
   const apiKey = process.env.SMS_API_KEY;
@@ -223,7 +218,7 @@ app.get('/api/admin/orders', (req, res) => {
   try {
     const db = getDb();
     const stmt = db.prepare('SELECT * FROM orders ORDER BY created_at DESC');
-    
+
     const rows = [];
     while (stmt.step()) {
       rows.push(stmt.getAsObject());
@@ -269,7 +264,7 @@ app.post('/api/admin/menu', (req, res) => {
   try {
     const db = getDb();
     db.run('INSERT INTO menu (name, category, price, image) VALUES (?, ?, ?, ?)', [name, category, price, image]);
-    
+
     const resStmt = db.prepare('SELECT last_insert_rowid() AS id');
     resStmt.step();
     const newId = resStmt.getAsObject().id;
@@ -298,7 +293,7 @@ app.delete('/api/admin/orders', (req, res) => {
       db.run('DELETE FROM orders');
     }
     saveDatabase();
-    res.json({ message: `Successfully cleared order record(s).` });
+    res.json({ message: 'Successfully cleared order record(s).' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -321,6 +316,11 @@ app.post('/api/admin/reset-db', (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Kitchen De Stella server running on http://localhost:${PORT}`);
+// Initialize DB before starting Express server
+initDatabase().then(() => {
+  app.listen(PORT, () => {
+    console.log(`Kitchen De Stella server running on http://localhost:${PORT}`);
+  });
+}).catch(err => {
+  console.error('Failed to initialize database server:', err);
 });
