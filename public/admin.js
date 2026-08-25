@@ -3,7 +3,8 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function getAdminPasscode() {
-  return localStorage.getItem('admin_passcode') || 'stella2026';
+  // Checks 'adminPasscode' (matching app.js) or 'stella_user', fallback to 'Stella123'
+  return localStorage.getItem('adminPasscode') || localStorage.getItem('admin_passcode') || 'Stella123';
 }
 
 async function fetchOrders() {
@@ -14,13 +15,13 @@ async function fetchOrders() {
     });
 
     if (!res.ok) {
-      tbody.innerHTML = '<tr><td colspan="9" style="color:red;">Unauthorized access. Please log in as admin.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="9" style="color:red; text-align:center;">Unauthorized access. Please log out and log in as admin.</td></tr>';
       return;
     }
 
     const orders = await res.json();
     if (orders.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="9">No orders found.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;">No orders found.</td></tr>';
       return;
     }
 
@@ -50,7 +51,7 @@ async function fetchOrders() {
       tbody.appendChild(tr);
     });
   } catch (err) {
-    tbody.innerHTML = '<tr><td colspan="9">Error loading orders.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;">Error loading orders.</td></tr>';
   }
 }
 

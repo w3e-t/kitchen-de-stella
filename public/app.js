@@ -105,6 +105,9 @@ async function handleLogin(e) {
 
     if (res.ok) {
       if (data.user.role === 'admin') {
+        // Save admin password so admin API endpoints approve access
+        localStorage.setItem('adminPasscode', password);
+        localStorage.setItem('stella_user', JSON.stringify(data.user));
         window.location.href = '/admin.html';
         return;
       }
@@ -152,6 +155,7 @@ async function handleRegister(e) {
 function handleLogout() {
   currentUser = null;
   localStorage.removeItem('stella_user');
+  localStorage.removeItem('adminPasscode');
   updateAuthUI();
 }
 
