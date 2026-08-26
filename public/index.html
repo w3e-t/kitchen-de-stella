@@ -18,9 +18,11 @@
       </div>
       
       <div class="nav-right">
+        <!-- Visible on desktop, hidden on mobile -->
         <span id="auth-nav-container">
           <button class="nav-auth-btn" onclick="toggleAuthModal()">Login / Register</button>
         </span>
+
         <button class="cart-btn" onclick="toggleCartModal()">
           🛒 Cart (<span id="cart-count">0</span>)
         </button>
@@ -44,6 +46,8 @@
       <nav class="drawer-links">
         <a href="#menu" onclick="toggleDrawer()"><i class="fa-solid fa-utensils"></i> Menu</a>
         <a href="#about" onclick="toggleDrawer()"><i class="fa-solid fa-circle-info"></i> About Us</a>
+        <!-- Login / Register Link inside drawer for mobile -->
+        <a href="#" onclick="toggleAuthModal(); toggleDrawer();"><i class="fa-solid fa-user"></i> Login / Register</a>
       </nav>
     </div>
   </header>
