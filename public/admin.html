@@ -10,6 +10,8 @@
     body { background: #f1f2f6; color: #2f3542; padding: 2rem; }
     .admin-container { max-width: 1100px; margin: 0 auto; }
     .header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+    .header-bar h1 { display: flex; align-items: center; gap: 10px; font-size: 1.8rem; }
+    .admin-avatar { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 2px solid #ff4757; }
     .orders-table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
     .orders-table th, .orders-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #ddd; }
     .orders-table th { background: #ff4757; color: #fff; }
@@ -20,7 +22,10 @@
 
   <div class="admin-container">
     <div class="header-bar">
-      <h1>Kitchen De Stella - Admin Dashboard 🍲</h1>
+      <h1>
+        Kitchen De Stella - Admin Dashboard 
+        <img src="images/admin-profile.jpg" alt="Admin" class="admin-avatar" onerror="this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80'">
+      </h1>
       <button onclick="window.location.href='/'" style="padding: 8px 16px; background: #2f3542; color: #fff; border: none; border-radius: 4px; cursor: pointer;">Go to Site</button>
     </div>
 
