@@ -210,7 +210,13 @@ function handleLogout() {
 
 /* User Order History */
 async function openMyOrders() {
-  if (!currentUser) return;
+  // If not logged in, prompt user to log in first
+  if (!currentUser) {
+    alert('Please log in or create an account to view your order history!');
+    toggleAuthModal();
+    return;
+  }
+
   const modal = document.getElementById('orders-modal');
   const container = document.getElementById('user-orders-list');
   modal.style.display = 'flex';
@@ -350,11 +356,30 @@ async function submitOrder(e) {
         : '';
 
       alert(`🎉 Order placed successfully! Order ID: #${result.orderId}${deliveryNotice}`);
-      
+
+      // Build WhatsApp pre-filled message
+      const itemsList = cart.map(i => `• ${i.name} (x${i.quantity}) - GH₵ ${(i.price * i.quantity).toFixed(2)}`).join('\n');
+      const waMessage = encodeURIComponent(
+        `Hello Kitchen De Stella! 🍲\n` +
+        `I just placed an order on the website (#${result.orderId}):\n\n` +
+        `*Order Items:*\n${itemsList}\n\n` +
+        `*Total Amount:* GH₵ ${total_amount.toFixed(2)}\n` +
+        `*Fulfillment:* ${fulfillment_type}\n` +
+        `*Branch:* ${branch}\n` +
+        `*Customer Phone:* ${customer_phone}\n` +
+        `*Delivery Address:* ${delivery_location}\n` +
+        `*Payment Choice:* ${payment_method}`
+      );
+
+      // Reset cart and checkout modal
       cart = [];
       updateCartUI();
       toggleCartModal();
       document.getElementById('checkout-form').reset();
+
+      // Open WhatsApp with order details (0276061417)
+      const adminWhatsApp = '233276061417';
+      window.open(`https://wa.me/${adminWhatsApp}?text=${waMessage}`, '_blank');
     } else {
       alert('Failed: ' + result.error);
     }
