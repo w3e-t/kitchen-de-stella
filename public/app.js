@@ -5,17 +5,6 @@ let currentUser = JSON.parse(localStorage.getItem('stella_user')) || null;
 document.addEventListener('DOMContentLoaded', () => {
   fetchMenu();
   updateAuthUI();
-
-  // Automatically load "All" items if the user is already logged in
-  if (currentUser) {
-    filterMenu('All');
-  } else {
-    // Hide menu items and display a login prompt when logged out
-    const menuGrid = document.getElementById('menu-grid');
-    if (menuGrid) {
-      menuGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; font-weight: 600; padding: 2rem;">Please log in to view our special menu!</p>';
-    }
-  }
 });
 
 function updateAuthUI() {
@@ -41,7 +30,8 @@ async function fetchMenu() {
   try {
     const response = await fetch('/api/menu');
     allMenuItems = await response.json();
-    // Do not auto-render here so items remain hidden until logged in/requested
+    // Render all items immediately for everyone
+    renderMenu(allMenuItems);
   } catch (error) {
     console.error('Error fetching menu:', error);
   }
@@ -70,20 +60,13 @@ function renderMenu(items) {
 }
 
 function filterMenu(category, e) {
-  // 1. Block guests and prompt for login
-  if (!currentUser) {
-    alert('Please log in or create an account to view our menu and place orders!');
-    toggleAuthModal();
-    return;
-  }
-
-  // 2. Update active tab styling
+  // Update button active states
   if (e && e.target && e.target.classList.contains('filter-btn')) {
     document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
     e.target.classList.add('active');
   }
 
-  // 3. Render items
+  // Filter and show items (no login check needed)
   if (category === 'All') {
     renderMenu(allMenuItems);
   } else {
@@ -97,6 +80,7 @@ function toggleAuthModal() {
   const modal = document.getElementById('auth-modal');
   modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
 }
+
 function switchAuthTab(type) {
   const loginForm = document.getElementById('login-form');
   const regForm = document.getElementById('register-form');
@@ -137,9 +121,6 @@ async function handleLogin(e) {
       localStorage.setItem('stella_user', JSON.stringify(currentUser));
       updateAuthUI();
       toggleAuthModal();
-      
-      // Auto-display menu upon login
-      filterMenu('All');
 
       alert(`Welcome back, ${currentUser.fullname}!`);
     } else {
@@ -170,9 +151,6 @@ async function handleRegister(e) {
       updateAuthUI();
       toggleAuthModal();
 
-      // Auto-display menu upon registration
-      filterMenu('All');
-
       alert('Account registered successfully!');
     } else {
       alert(data.error);
@@ -187,12 +165,6 @@ function handleLogout() {
   localStorage.removeItem('stella_user');
   localStorage.removeItem('adminPasscode');
   updateAuthUI();
-
-  // Reset menu grid view on logout
-  const menuGrid = document.getElementById('menu-grid');
-  if (menuGrid) {
-    menuGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; font-weight: 600; padding: 2rem;">Please log in to view our special menu!</p>';
-  }
 }
 
 // User Orders History Modal
@@ -311,7 +283,7 @@ async function submitOrder(e) {
   const total_amount = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
   const payload = {
-    user_id: currentUser ? currentUser.id : null,
+    user_id: currentUser ? currentUser.id : null, // Optional user ID for guest orders
     branch,
     fulfillment_type,
     customer_phone,
