@@ -5,7 +5,38 @@ let currentUser = JSON.parse(localStorage.getItem('stella_user')) || null;
 document.addEventListener('DOMContentLoaded', () => {
   fetchMenu();
   updateAuthUI();
+
+  // Close drawer menu when clicking anywhere outside of it
+  document.addEventListener('click', (event) => {
+    const navDrawer = document.getElementById('navDrawer');
+    const menuToggle = document.getElementById('menuToggle');
+    
+    if (navDrawer && menuToggle) {
+      if (!navDrawer.contains(event.target) && !menuToggle.contains(event.target)) {
+        navDrawer.classList.remove('active');
+      }
+    }
+  });
 });
+
+/* Drawer Navigation & Live Search Toggle */
+function toggleDrawer() {
+  const navDrawer = document.getElementById('navDrawer');
+  if (navDrawer) {
+    navDrawer.classList.toggle('active');
+  }
+}
+
+function handleMenuSearch(e) {
+  const query = e.target.value.toLowerCase().trim();
+  
+  // Filter menu items by name matching query
+  const filtered = allMenuItems.filter(item => 
+    item.name.toLowerCase().includes(query)
+  );
+  
+  renderMenu(filtered);
+}
 
 function updateAuthUI() {
   const container = document.getElementById('auth-nav-container');
@@ -44,6 +75,11 @@ function renderMenu(items) {
   menuGrid.innerHTML = '';
 
   const fallbackImg = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80';
+
+  if (items.length === 0) {
+    menuGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #777;">No matching menu items found.</p>';
+    return;
+  }
 
   items.forEach(item => {
     const imageSrc = item.image ? `images/${item.image}` : fallbackImg;

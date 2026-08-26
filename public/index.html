@@ -15,10 +15,6 @@
     <div class="nav-container">
       <div class="nav-left">
         <a href="#" class="logo">Kitchen De Stella 🍲</a>
-        <nav class="nav-links">
-          <a href="#menu">Menu</a>
-          <a href="#about">About Us</a>
-        </nav>
       </div>
       
       <div class="nav-right">
@@ -28,7 +24,27 @@
         <button class="cart-btn" onclick="toggleCartModal()">
           🛒 Cart (<span id="cart-count">0</span>)
         </button>
+
+        <!-- Hamburger Icon (3 Bars) -->
+        <button class="hamburger-btn" id="menuToggle" aria-label="Toggle Navigation" onclick="toggleDrawer()">
+          <i class="fa-solid fa-bars"></i>
+        </button>
       </div>
+    </div>
+
+    <!-- Slide-Out / Dropdown Drawer Menu -->
+    <div class="nav-drawer" id="navDrawer">
+      <!-- Search Bar -->
+      <div class="drawer-search-box">
+        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+        <input type="text" id="drawerSearchInput" placeholder="Search menu items..." onkeyup="handleMenuSearch(event)">
+      </div>
+
+      <!-- Navigation Links -->
+      <nav class="drawer-links">
+        <a href="#menu" onclick="toggleDrawer()"><i class="fa-solid fa-utensils"></i> Menu</a>
+        <a href="#about" onclick="toggleDrawer()"><i class="fa-solid fa-circle-info"></i> About Us</a>
+      </nav>
     </div>
   </header>
 

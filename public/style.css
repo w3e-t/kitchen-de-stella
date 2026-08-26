@@ -49,28 +49,104 @@ html, body {
   white-space: nowrap;
 }
 
-.nav-links {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.nav-links a {
-  color: #fff;
-  text-decoration: none;
-  font-weight: 600;
-  font-size: 0.95rem;
-  transition: color 0.3s;
-}
-
-.nav-links a:hover {
-  color: #ffa502;
-}
-
 .nav-right {
   display: flex;
   align-items: center;
   gap: 10px;
+}
+
+/* Hamburger Toggle Button */
+.hamburger-btn {
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 1.4rem;
+  cursor: pointer;
+  padding: 0.3rem 0.5rem;
+  transition: transform 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hamburger-btn:hover {
+  transform: scale(1.1);
+}
+
+/* Drawer Navigation Menu */
+.nav-drawer {
+  display: none;
+  flex-direction: column;
+  background: #fff;
+  position: absolute;
+  top: 100%;
+  right: 5%;
+  width: 260px;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+  padding: 1rem;
+  gap: 1rem;
+  z-index: 99;
+}
+
+.nav-drawer.active {
+  display: flex;
+  animation: slideDown 0.3s ease-in-out;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Drawer Search Box */
+.drawer-search-box {
+  display: flex;
+  align-items: center;
+  background: #f1f2f6;
+  border-radius: 20px;
+  padding: 0.4rem 0.8rem;
+  border: 1px solid #ddd;
+}
+
+.drawer-search-box .search-icon {
+  color: #888;
+  margin-right: 8px;
+  font-size: 0.88rem;
+}
+
+.drawer-search-box input {
+  border: none;
+  background: transparent;
+  outline: none;
+  width: 100%;
+  font-size: 0.88rem;
+  color: #333;
+}
+
+/* Drawer Navigation Links */
+.drawer-links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.drawer-links a {
+  color: #2f3542;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 0.5rem 0.8rem;
+  border-radius: 8px;
+  transition: background 0.2s, color 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.drawer-links a:hover {
+  background: #ff4757;
+  color: #fff;
 }
 
 .nav-auth-btn {
@@ -436,14 +512,6 @@ html, body {
     gap: 0.8rem;
   }
 
-  .nav-links {
-    gap: 0.6rem;
-  }
-
-  .nav-links a {
-    font-size: 0.85rem;
-  }
-
   .nav-right {
     gap: 6px;
   }
@@ -451,6 +519,11 @@ html, body {
   .nav-auth-btn, .cart-btn {
     padding: 0.35rem 0.6rem;
     font-size: 0.78rem;
+  }
+
+  .nav-drawer {
+    right: 3%;
+    width: 230px;
   }
 
   /* Compact 2-column menu layout for mobile */
