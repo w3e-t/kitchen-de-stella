@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Kitchen De Stella | Afienya</title>
   <link rel="stylesheet" href="style.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
@@ -12,17 +12,24 @@
 
   <!-- Navigation Bar -->
   <header class="navbar">
-    <div class="logo">Kitchen De Stella 🍲</div>
-    <nav>
-      <a href="#menu">Menu</a>
-      <a href="#about">About Us</a>
-      <span id="auth-nav-container">
-        <button class="nav-auth-btn" onclick="toggleAuthModal()">Login / Register</button>
-      </span>
-      <button class="cart-btn" onclick="toggleCartModal()">
-        🛒 Cart (<span id="cart-count">0</span>)
-      </button>
-    </nav>
+    <div class="nav-container">
+      <div class="nav-left">
+        <a href="#" class="logo">Kitchen De Stella 🍲</a>
+        <nav class="nav-links">
+          <a href="#menu">Menu</a>
+          <a href="#about">About Us</a>
+        </nav>
+      </div>
+      
+      <div class="nav-right">
+        <span id="auth-nav-container">
+          <button class="nav-auth-btn" onclick="toggleAuthModal()">Login / Register</button>
+        </span>
+        <button class="cart-btn" onclick="toggleCartModal()">
+          🛒 Cart (<span id="cart-count">0</span>)
+        </button>
+      </div>
+    </div>
   </header>
 
   <!-- Hero Section -->
@@ -49,45 +56,45 @@
 
   <!-- About Us Section -->
   <section class="about-section" id="about">
-  <div class="about-card">
-    <h2>About Kitchen De Stella</h2>
-    <p>Welcome to Kitchen De Stella! We serve delicious, freshly made meals prepared with high-quality ingredients. Order online for quick pickup or fast delivery right to your location.</p>
-    
-    <!-- Contacts Block -->
-    <div class="contact-info-block">
-      <p class="contact-heading">You can contact us on:</p>
-      <div class="contact-links">
-        <a href="https://wa.me/233276061417" target="_blank" class="contact-item whatsapp">
-          <i class="fa-brands fa-whatsapp"></i> 0276061417
-        </a>
-        <a href="tel:0240378173" class="contact-item phone">
-          <i class="fa-solid fa-phone"></i> 0240378173
-        </a>
-        <a href="https://facebook.com/kitchendestella" target="_blank" class="contact-item facebook">
-          <i class="fa-brands fa-facebook"></i> @kitchendestella
-        </a>
-        <a href="https://instagram.com/kitchen_stella" target="_blank" class="contact-item instagram">
-          <i class="fa-brands fa-instagram"></i> kitchen_stella
-        </a>
+    <div class="about-card">
+      <h2>About Kitchen De Stella</h2>
+      <p>Welcome to Kitchen De Stella! We serve delicious, freshly made meals prepared with high-quality ingredients. Order online for quick pickup or fast delivery right to your location.</p>
+      
+      <!-- Contacts Block -->
+      <div class="contact-info-block">
+        <p class="contact-heading">You can contact us on:</p>
+        <div class="contact-links">
+          <a href="https://wa.me/233276061417" target="_blank" class="contact-item whatsapp">
+            <i class="fa-brands fa-whatsapp"></i> 0276061417
+          </a>
+          <a href="tel:0240378173" class="contact-item phone">
+            <i class="fa-solid fa-phone"></i> 0240378173
+          </a>
+          <a href="https://facebook.com/kitchendestella" target="_blank" class="contact-item facebook">
+            <i class="fa-brands fa-facebook"></i> @kitchendestella
+          </a>
+          <a href="https://instagram.com/kitchen_stella" target="_blank" class="contact-item instagram">
+            <i class="fa-brands fa-instagram"></i> kitchen_stella
+          </a>
+        </div>
+      </div>
+
+      <!-- Branches Block -->
+      <div class="branches-block" style="margin-top: 1.5rem;">
+        <h3 style="margin-bottom: 0.8rem; color: #2f3542;">Our Afienya Branches</h3>
+        <ul class="branch-list">
+          <li>📍 <strong>Branch 1:</strong> Star Oil Filling Station, Afienya</li>
+          <li>📍 <strong>Branch 2:</strong> Goil Filling Station, Afienya</li>
+        </ul>
       </div>
     </div>
-
-    <!-- Branches Block (Placed directly under contacts) -->
-    <div class="branches-block" style="margin-top: 1.5rem;">
-      <h3 style="margin-bottom: 0.8rem; color: #2f3542;">Our Afienya Branches</h3>
-      <ul class="branch-list">
-        <li>📍 <strong>Branch 1:</strong> Star Oil Filling Station, Afienya</li>
-        <li>📍 <strong>Branch 2:</strong> Goil Filling Station, Afienya</li>
-      </ul>
-    </div>
-  </div>
-</section>
+  </section>
 
   <!-- Login / Register Modal -->
   <div class="modal-overlay" id="auth-modal">
     <div class="modal-content">
       <div class="modal-header">
-        <h2 id="auth-modal-title">Login/Create an account</h2>
+        <h2 id="auth-modal-title">Login / Create an Account</h2>
         <span class="close-btn" onclick="toggleAuthModal()">&times;</span>
       </div>
 
@@ -95,7 +102,7 @@
       <form id="login-form" onsubmit="handleLogin(event)" style="margin-top: 1rem;">
         <div class="form-group">
           <label>Phone Number:</label>
-          <input type="text" id="login-phone" placeholder="e.g. 024XXXXXXX " required>
+          <input type="text" id="login-phone" placeholder="e.g. 024XXXXXXX" required>
         </div>
         <div class="form-group">
           <label>Password:</label>

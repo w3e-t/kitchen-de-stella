@@ -10,10 +10,12 @@ document.addEventListener('DOMContentLoaded', () => {
 function updateAuthUI() {
   const container = document.getElementById('auth-nav-container');
   if (currentUser) {
-    if (currentUser.phone === '024XXXXXXX') {
-      const phoneInput = document.getElementById('customer-phone');
-      if (phoneInput) phoneInput.value = currentUser.phone;
+    // Auto-fill phone in checkout form if user is logged in
+    const phoneInput = document.getElementById('customer-phone');
+    if (phoneInput && currentUser.phone) {
+      phoneInput.value = currentUser.phone;
     }
+
     container.innerHTML = `
       <span class="user-welcome">Hi, ${currentUser.fullname.split(' ')[0]}</span>
       <button class="nav-auth-btn" onclick="openMyOrders()">My Orders</button>
@@ -30,7 +32,6 @@ async function fetchMenu() {
   try {
     const response = await fetch('/api/menu');
     allMenuItems = await response.json();
-    // Render all items immediately for everyone
     renderMenu(allMenuItems);
   } catch (error) {
     console.error('Error fetching menu:', error);
@@ -42,13 +43,15 @@ function renderMenu(items) {
   if (!menuGrid) return;
   menuGrid.innerHTML = '';
 
+  const fallbackImg = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80';
+
   items.forEach(item => {
-    const imageSrc = item.image ? `images/${item.image}` : 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80';
+    const imageSrc = item.image ? `images/${item.image}` : fallbackImg;
 
     const card = document.createElement('div');
     card.className = 'card';
     card.innerHTML = `
-      <img src="${imageSrc}" alt="${item.name}" onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80'">
+      <img src="${imageSrc}" alt="${item.name}" onerror="this.src='${fallbackImg}'">
       <div class="card-info">
         <h3>${item.name}</h3>
         <p class="price">GH₵ ${item.price.toFixed(2)}</p>
@@ -60,13 +63,11 @@ function renderMenu(items) {
 }
 
 function filterMenu(category, e) {
-  // Update button active states
   if (e && e.target && e.target.classList.contains('filter-btn')) {
     document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
     e.target.classList.add('active');
   }
 
-  // Filter and show items (no login check needed)
   if (category === 'All') {
     renderMenu(allMenuItems);
   } else {
@@ -75,7 +76,7 @@ function filterMenu(category, e) {
   }
 }
 
-// Auth Functions
+/* Authentication */
 function toggleAuthModal() {
   const modal = document.getElementById('auth-modal');
   modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
@@ -167,7 +168,7 @@ function handleLogout() {
   updateAuthUI();
 }
 
-// User Orders History Modal
+/* User Order History */
 async function openMyOrders() {
   if (!currentUser) return;
   const modal = document.getElementById('orders-modal');
@@ -207,7 +208,7 @@ function toggleOrdersModal() {
   document.getElementById('orders-modal').style.display = 'none';
 }
 
-// Cart logic
+/* Cart & Checkout Logic */
 function addToCart(itemId) {
   const product = allMenuItems.find(p => p.id === itemId);
   const existingIndex = cart.findIndex(c => c.id === itemId);
@@ -283,7 +284,7 @@ async function submitOrder(e) {
   const total_amount = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
   const payload = {
-    user_id: currentUser ? currentUser.id : null, // Optional user ID for guest orders
+    user_id: currentUser ? currentUser.id : null,
     branch,
     fulfillment_type,
     customer_phone,
