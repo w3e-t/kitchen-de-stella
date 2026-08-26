@@ -2,9 +2,26 @@ let allMenuItems = [];
 let cart = [];
 let currentUser = JSON.parse(localStorage.getItem('stella_user')) || null;
 
+/* Opening Hours Helper Function */
+function isKitchenOpen() {
+  const now = new Date();
+  const hours = now.getHours(); // 0 to 23
+  // Open at 6 AM (6) and closes at 10 PM (22)
+  return hours >= 6 && hours < 22;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   fetchMenu();
   updateAuthUI();
+
+  // Show top alert banner if kitchen is closed
+  if (!isKitchenOpen()) {
+    const banner = document.createElement('div');
+    banner.id = 'kitchen-closed-banner';
+    banner.style.cssText = 'background: #ff4757; color: #ffffff; text-align: center; padding: 10px; font-weight: 600; font-size: 0.95rem; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 5px rgba(0,0,0,0.2);';
+    banner.innerHTML = '🔴 Orders are currently CLOSED. Operating hours are 6:00 AM – 10:00 PM daily.';
+    document.body.insertBefore(banner, document.body.firstChild);
+  }
 
   // Close drawer menu when clicking anywhere outside of it
   document.addEventListener('click', (event) => {
@@ -328,6 +345,12 @@ function toggleCartModal() {
 
 async function submitOrder(e) {
   e.preventDefault();
+
+  // Operating hours check
+  if (!isKitchenOpen()) {
+    alert('🔴 Kitchen De Stella is currently CLOSED.\n\nWe accept orders daily between 6:00 AM and 10:00 PM.');
+    return;
+  }
 
   if (cart.length === 0) {
     alert('Your cart is empty!');

@@ -1,10 +1,78 @@
 document.addEventListener('DOMContentLoaded', () => {
   fetchOrders();
+  fetchAdminMenu();
 });
 
 function getAdminPasscode() {
   // Checks 'adminPasscode' (matching app.js) or 'stella_user', fallback to 'Stella123'
   return localStorage.getItem('adminPasscode') || localStorage.getItem('admin_passcode') || 'Stella123';
+}
+
+// Fetch and render menu items for price management
+async function fetchAdminMenu() {
+  const tbody = document.getElementById('admin-menu-body');
+  try {
+    const res = await fetch('/api/menu');
+    const menuItems = await res.json();
+
+    if (!menuItems || menuItems.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No menu items found.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = '';
+    menuItems.forEach(item => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>#${item.id}</td>
+        <td><strong>${item.name}</strong></td>
+        <td>${item.category}</td>
+        <td>
+          GH₵ <input type="number" step="0.5" id="price-input-${item.id}" value="${item.price}" style="width: 90px; padding: 5px;">
+        </td>
+        <td>
+          <button onclick="updatePrice(${item.id})" style="background: #70a1ff; color: #fff; border: none; padding: 5px 12px; border-radius: 4px; cursor: pointer; font-weight: 600;">
+            Save Price
+          </button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  } catch (err) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Error loading menu items.</td></tr>';
+  }
+}
+
+// Save updated price to backend database
+async function updatePrice(itemId) {
+  const priceInput = document.getElementById(`price-input-${itemId}`);
+  const newPrice = parseFloat(priceInput.value);
+
+  if (isNaN(newPrice) || newPrice < 0) {
+    alert('Please enter a valid price.');
+    return;
+  }
+
+  try {
+    const res = await fetch(`/api/admin/menu/${itemId}/price`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-admin-passcode': getAdminPasscode()
+      },
+      body: JSON.stringify({ price: newPrice })
+    });
+
+    const data = await res.json();
+    if (res.ok) {
+      alert(data.message || 'Price updated successfully!');
+      fetchAdminMenu(); // Refresh table view
+    } else {
+      alert(data.error || 'Failed to update price.');
+    }
+  } catch (err) {
+    alert('Server error while updating price.');
+  }
 }
 
 async function fetchOrders() {
@@ -95,6 +163,7 @@ async function addMenuItem(e) {
   if (res.ok) {
     alert('Item added successfully!');
     document.getElementById('add-item-form').reset();
+    fetchAdminMenu(); // Refresh admin menu table
   } else {
     alert('Failed to add item');
   }

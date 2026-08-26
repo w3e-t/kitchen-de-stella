@@ -277,6 +277,29 @@ app.post('/api/admin/menu', (req, res) => {
   }
 });
 
+// Admin: Update Item Price
+app.put('/api/admin/menu/:id/price', (req, res) => {
+  if (!isValidAdmin(req)) {
+    return res.status(401).json({ error: 'Unauthorized access.' });
+  }
+
+  const { id } = req.params;
+  const { price } = req.body;
+
+  if (price === undefined || isNaN(price) || price < 0) {
+    return res.status(400).json({ error: 'Please provide a valid price.' });
+  }
+
+  try {
+    const db = getDb();
+    db.run('UPDATE menu SET price = ? WHERE id = ?', [parseFloat(price), id]);
+    saveDatabase();
+    res.json({ message: 'Item price updated successfully!' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Admin: Delete Orders
 app.delete('/api/admin/orders', (req, res) => {
   if (!isValidAdmin(req)) {

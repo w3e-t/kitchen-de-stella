@@ -12,9 +12,9 @@
     .header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
     .header-bar h1 { display: flex; align-items: center; gap: 10px; font-size: 1.8rem; }
     .admin-avatar { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 2px solid #ff4757; }
-    .orders-table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-    .orders-table th, .orders-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #ddd; }
-    .orders-table th { background: #ff4757; color: #fff; }
+    .orders-table, .menu-table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+    .orders-table th, .orders-table td, .menu-table th, .menu-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #ddd; }
+    .orders-table th, .menu-table th { background: #ff4757; color: #fff; }
     .status-select { padding: 5px; border-radius: 4px; }
   </style>
 </head>
@@ -42,6 +42,25 @@
         <input type="text" id="item-image" placeholder="Image Filename (e.g. fufu.jpg)" required style="padding:8px;">
         <button type="submit" style="grid-column: span 2; padding:10px; background:#2ed573; color:#fff; border:none; border-radius: 4px; cursor:pointer; font-weight: 600;">Add Item</button>
       </form>
+    </div>
+
+    <!-- Manage Menu & Prices -->
+    <div style="margin-bottom: 2rem;">
+      <h3>Manage Menu & Update Prices</h3>
+      <table class="menu-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Item Name</th>
+            <th>Category</th>
+            <th>Current Price (GH₵)</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="admin-menu-body">
+          <tr><td colspan="5">Loading menu items...</td></tr>
+        </tbody>
+      </table>
     </div>
 
     <!-- Orders Management -->
