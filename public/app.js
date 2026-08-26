@@ -350,13 +350,6 @@ async function submitOrder(e) {
     const result = await response.json();
 
     if (response.ok) {
-      // Custom notice regarding delivery fees
-      const deliveryNotice = fulfillment_type === 'Delivery' 
-        ? '\n\n🚚 Delivery Fee Notice:\n• Within Afienya & environs: GH₵ 10.00\n• Outside Afienya: GH₵ 15.00'
-        : '';
-
-      alert(`🎉 Order placed successfully! Order ID: #${result.orderId}${deliveryNotice}`);
-
       // Build WhatsApp pre-filled message
       const itemsList = cart.map(i => `• ${i.name} (x${i.quantity}) - GH₵ ${(i.price * i.quantity).toFixed(2)}`).join('\n');
       const waMessage = encodeURIComponent(
@@ -377,9 +370,9 @@ async function submitOrder(e) {
       toggleCartModal();
       document.getElementById('checkout-form').reset();
 
-      // Open WhatsApp with order details (0276061417)
+      // Redirect directly to WhatsApp (prevents browser popup blocking)
       const adminWhatsApp = '233276061417';
-      window.open(`https://wa.me/${adminWhatsApp}?text=${waMessage}`, '_blank');
+      window.location.href = `https://wa.me/${adminWhatsApp}?text=${waMessage}`;
     } else {
       alert('Failed: ' + result.error);
     }
