@@ -40,6 +40,7 @@ function handleMenuSearch(e) {
 
 function updateAuthUI() {
   const drawerContainer = document.getElementById('drawer-auth-container');
+  const userGreetingEl = document.getElementById('user-greeting');
 
   if (currentUser) {
     // Auto-fill phone in checkout form if user is logged in
@@ -48,16 +49,26 @@ function updateAuthUI() {
       phoneInput.value = currentUser.phone;
     }
 
+    // Render user greeting beside the Cart button in top navbar
+    if (userGreetingEl) {
+      const firstName = currentUser.fullname ? currentUser.fullname.split(' ')[0] : 'User';
+      userGreetingEl.innerHTML = `Hi, ${firstName}`;
+    }
+
+    // Render remaining links inside drawer menu
     if (drawerContainer) {
       drawerContainer.innerHTML = `
-        <div style="padding: 10px 15px; border-top: 1px solid #eee; margin-top: 10px;">
-          <span style="font-weight: 600; color: #ff4757;">Hi, ${currentUser.fullname.split(' ')[0]}</span>
-        </div>
         <a href="#" onclick="openMyOrders(); toggleDrawer();"><i class="fa-solid fa-clock-rotate-left"></i> My Orders</a>
         <a href="#" onclick="handleLogout(); toggleDrawer();" style="color: #ffa502;"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
       `;
     }
   } else {
+    // Clear greeting when logged out
+    if (userGreetingEl) {
+      userGreetingEl.innerHTML = '';
+    }
+
+    // Show login link in drawer menu
     if (drawerContainer) {
       drawerContainer.innerHTML = `
         <a href="#" onclick="toggleAuthModal(); toggleDrawer();"><i class="fa-solid fa-user"></i> Login / Register</a>
@@ -213,7 +224,6 @@ function handleLogout() {
 
 /* User Order History */
 async function openMyOrders() {
-  // If not logged in, prompt user to log in first
   if (!currentUser) {
     alert('Please log in or create an account to view your order history!');
     toggleAuthModal();
@@ -353,7 +363,6 @@ async function submitOrder(e) {
     const result = await response.json();
 
     if (response.ok) {
-      // Build WhatsApp pre-filled message
       const itemsList = cart.map(i => `• ${i.name} (x${i.quantity}) - GH₵ ${(i.price * i.quantity).toFixed(2)}`).join('\n');
       const waMessage = encodeURIComponent(
         `Hello Kitchen De Stella! 🍲\n` +
@@ -367,13 +376,11 @@ async function submitOrder(e) {
         `*Payment Choice:* ${payment_method}`
       );
 
-      // Reset cart and checkout modal
       cart = [];
       updateCartUI();
       toggleCartModal();
       document.getElementById('checkout-form').reset();
 
-      // Redirect directly to WhatsApp (prevents browser popup blocking)
       const adminWhatsApp = '233276061417';
       window.location.href = `https://wa.me/${adminWhatsApp}?text=${waMessage}`;
     } else {
