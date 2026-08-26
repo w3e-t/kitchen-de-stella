@@ -47,15 +47,19 @@ function updateAuthUI() {
       phoneInput.value = currentUser.phone;
     }
 
-    container.innerHTML = `
-      <span class="user-welcome">Hi, ${currentUser.fullname.split(' ')[0]}</span>
-      <button class="nav-auth-btn" onclick="openMyOrders()">My Orders</button>
-      <button class="nav-auth-btn" style="border-color:#ffa502;" onclick="handleLogout()">Logout</button>
-    `;
+    if (container) {
+      container.innerHTML = `
+        <span class="user-welcome">Hi, ${currentUser.fullname.split(' ')[0]}</span>
+        <button class="nav-auth-btn" onclick="openMyOrders()">My Orders</button>
+        <button class="nav-auth-btn" style="border-color:#ffa502;" onclick="handleLogout()">Logout</button>
+      `;
+    }
   } else {
-    container.innerHTML = `
-      <button class="nav-auth-btn" onclick="toggleAuthModal()">Login / Register</button>
-    `;
+    if (container) {
+      container.innerHTML = `
+        <button class="nav-auth-btn" onclick="toggleAuthModal()">Login / Register</button>
+      `;
+    }
   }
 }
 
@@ -340,7 +344,13 @@ async function submitOrder(e) {
     const result = await response.json();
 
     if (response.ok) {
-      alert(`🎉 Order placed successfully! Order ID: #${result.orderId}`);
+      // Custom notice regarding delivery fees
+      const deliveryNotice = fulfillment_type === 'Delivery' 
+        ? '\n\n🚚 Delivery Fee Notice:\n• Within Afienya & environs: GH₵ 10.00\n• Outside Afienya: GH₵ 15.00'
+        : '';
+
+      alert(`🎉 Order placed successfully! Order ID: #${result.orderId}${deliveryNotice}`);
+      
       cart = [];
       updateCartUI();
       toggleCartModal();
