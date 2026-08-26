@@ -32,6 +32,13 @@ const isValidAdmin = (req) => {
   return passcode === adminSecret;
 };
 
+// Opening Hours Helper (Server-side validation)
+function isKitchenOpenServer() {
+  const now = new Date();
+  const hours = now.getHours(); // 0 to 23
+  return hours >= 6 && hours < 22;
+}
+
 // API 1: Register User
 app.post('/api/auth/register', async (req, res) => {
   const { fullname, phone, password } = req.body;
@@ -175,23 +182,58 @@ async function sendAdminSMS(orderData) {
   }
 }
 
-// Place Order
+// Secure Order Submission
 app.post('/api/order', (req, res) => {
-  const { user_id, customer_phone, delivery_location, fulfillment_type, branch, payment_method, items, total_amount } = req.body;
+  // 1. Enforce Operating Hours Server-Side
+  if (!isKitchenOpenServer()) {
+    return res.status(403).json({ error: 'Kitchen De Stella is currently closed. Orders accepted 6:00 AM – 10:00 PM.' });
+  }
 
-  if (!customer_phone || !delivery_location || !items || items.length === 0) {
+  const { user_id, customer_phone, delivery_location, fulfillment_type, branch, payment_method, items } = req.body;
+
+  if (!customer_phone || !delivery_location || !items || !Array.isArray(items) || items.length === 0) {
     return res.status(400).json({ error: 'Please fill in all required order details.' });
   }
 
-  const itemsString = JSON.stringify(items);
-  const payment_status = payment_method === 'Paystack (Mobile Money)' ? 'Paid (Online)' : 'Pending (Pay on Delivery)';
-
   try {
     const db = getDb();
+
+    // 2. Fetch current DB menu prices to prevent client-side price tampering
+    const stmt = db.prepare('SELECT id, name, price FROM menu');
+    const dbMenu = {};
+    while (stmt.step()) {
+      const row = stmt.getAsObject();
+      dbMenu[row.id] = row;
+    }
+    stmt.free();
+
+    // 3. Recalculate official server-side total
+    let calculatedTotal = 0;
+    const verifiedItems = [];
+
+    for (const item of items) {
+      const dbItem = dbMenu[item.id];
+      if (!dbItem) {
+        return res.status(400).json({ error: `Invalid menu item selected (ID: ${item.id}).` });
+      }
+      const quantity = parseInt(item.quantity, 10) || 1;
+      calculatedTotal += dbItem.price * quantity;
+
+      verifiedItems.push({
+        id: dbItem.id,
+        name: dbItem.name,
+        price: dbItem.price,
+        quantity
+      });
+    }
+
+    const itemsString = JSON.stringify(verifiedItems);
+    const payment_status = payment_method === 'Paystack (Mobile Money)' ? 'Paid (Online)' : 'Pending (Pay on Delivery)';
+
     db.run(
       `INSERT INTO orders (user_id, customer_phone, delivery_location, fulfillment_type, branch, payment_method, payment_status, items, total_amount)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [user_id || null, customer_phone, delivery_location, fulfillment_type, branch, payment_method, payment_status, itemsString, total_amount]
+      [user_id || null, customer_phone, delivery_location, fulfillment_type, branch, payment_method, payment_status, itemsString, calculatedTotal]
     );
 
     const resStmt = db.prepare('SELECT last_insert_rowid() AS id');
@@ -201,9 +243,9 @@ app.post('/api/order', (req, res) => {
 
     saveDatabase();
 
-    sendAdminSMS({ orderId: newOrderId, customer_phone, delivery_location, fulfillment_type, branch, items, total_amount });
+    sendAdminSMS({ orderId: newOrderId, customer_phone, delivery_location, fulfillment_type, branch, items: verifiedItems, total_amount: calculatedTotal });
 
-    res.status(201).json({ message: 'Order placed successfully!', orderId: newOrderId });
+    res.status(201).json({ message: 'Order placed successfully!', orderId: newOrderId, total_amount: calculatedTotal });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
