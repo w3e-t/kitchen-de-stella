@@ -39,7 +39,8 @@ function handleMenuSearch(e) {
 }
 
 function updateAuthUI() {
-  const container = document.getElementById('auth-nav-container');
+  const drawerContainer = document.getElementById('drawer-auth-container');
+
   if (currentUser) {
     // Auto-fill phone in checkout form if user is logged in
     const phoneInput = document.getElementById('customer-phone');
@@ -47,17 +48,19 @@ function updateAuthUI() {
       phoneInput.value = currentUser.phone;
     }
 
-    if (container) {
-      container.innerHTML = `
-        <span class="user-welcome">Hi, ${currentUser.fullname.split(' ')[0]}</span>
-        <button class="nav-auth-btn" onclick="openMyOrders()">My Orders</button>
-        <button class="nav-auth-btn" style="border-color:#ffa502;" onclick="handleLogout()">Logout</button>
+    if (drawerContainer) {
+      drawerContainer.innerHTML = `
+        <div style="padding: 10px 15px; border-top: 1px solid #eee; margin-top: 10px;">
+          <span style="font-weight: 600; color: #ff4757;">Hi, ${currentUser.fullname.split(' ')[0]}</span>
+        </div>
+        <a href="#" onclick="openMyOrders(); toggleDrawer();"><i class="fa-solid fa-clock-rotate-left"></i> My Orders</a>
+        <a href="#" onclick="handleLogout(); toggleDrawer();" style="color: #ffa502;"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
       `;
     }
   } else {
-    if (container) {
-      container.innerHTML = `
-        <button class="nav-auth-btn" onclick="toggleAuthModal()">Login / Register</button>
+    if (drawerContainer) {
+      drawerContainer.innerHTML = `
+        <a href="#" onclick="toggleAuthModal(); toggleDrawer();"><i class="fa-solid fa-user"></i> Login / Register</a>
       `;
     }
   }
