@@ -16,8 +16,6 @@
   --navbar-bg: #ff4757;
   --navbar-text: #fff;
   --card-shadow: rgba(0,0,0,0.08);
-  --glass-bg: rgba(255, 255, 255, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.3);
 }
 
 /* Dark Mode */
@@ -31,8 +29,6 @@ html.dark-mode {
   --navbar-bg: #c23030;
   --navbar-text: #fff;
   --card-shadow: rgba(0,0,0,0.3);
-  --glass-bg: rgba(22, 33, 62, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.1);
 }
 
 html, body {
@@ -54,8 +50,7 @@ html, body {
   z-index: 100;
   box-shadow: 0 8px 32px rgba(0,0,0,0.15);
   padding: 0.8rem 5%;
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   transition: all 0.3s ease;
 }
 
@@ -134,9 +129,8 @@ html, body {
 .nav-drawer {
   display: none;
   flex-direction: column;
-  background: var(--glass-bg);
-  backdrop-filter: blur(20px);
-  border: 1px solid var(--glass-border);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
   position: absolute;
   top: 100%;
   right: 5%;
@@ -385,9 +379,8 @@ html, body {
 }
 
 .card {
-  background: var(--glass-bg);
-  backdrop-filter: blur(10px);
-  border: 1px solid var(--glass-border);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
   border-radius: 20px;
   overflow: hidden;
   box-shadow: 0 8px 32px var(--card-shadow);
@@ -412,7 +405,6 @@ html, body {
 .card:hover {
   transform: translateY(-12px) scale(1.02);
   box-shadow: 0 15px 50px var(--card-shadow);
-  backdrop-filter: blur(15px);
 }
 
 .card img {
@@ -436,7 +428,6 @@ html, body {
   flex-grow: 1;
   display: flex;
   flex-direction: column;
-  background: linear-gradient(135deg, var(--glass-bg) 0%, rgba(255, 255, 255, 0.05) 100%);
   transition: all 0.3s ease;
 }
 
@@ -527,9 +518,8 @@ html, body {
 }
 
 .about-card {
-  background: var(--glass-bg);
-  backdrop-filter: blur(10px);
-  border: 1px solid var(--glass-border);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
   padding: 2rem;
   border-radius: 16px;
   box-shadow: 0 8px 32px var(--card-shadow);
@@ -625,7 +615,6 @@ html, body {
   width: 100%;
   height: 100%;
   background: rgba(0,0,0,0.4);
-  backdrop-filter: blur(5px);
   z-index: 200;
   justify-content: center;
   align-items: center;
@@ -634,9 +623,8 @@ html, body {
 }
 
 .modal-content {
-  background: var(--glass-bg);
-  backdrop-filter: blur(20px);
-  border: 1px solid var(--glass-border);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
   width: 100%;
   max-width: 500px;
   max-height: 90vh;
