@@ -6,10 +6,45 @@ const path = require('path');
 const axios = require('axios');
 const bcrypt = require('bcryptjs');
 const rateLimit = require('express-rate-limit');
+const multer = require('multer');
+const fs = require('fs');
 const { initDatabase, getDb, saveDatabase } = require('./database');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Configure multer for image uploads
+const uploadsDir = path.join(__dirname, 'public', 'images');
+
+// Create images directory if it doesn't exist
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadsDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const ext = path.extname(file.originalname);
+    const name = path.basename(file.originalname, ext);
+    cb(null, name + '-' + uniqueSuffix + ext);
+  }
+});
+
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+  fileFilter: (req, file, cb) => {
+    const allowedMimes = ['image/jpeg', 'image/png'];
+    if (allowedMimes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only JPG and PNG images are allowed'));
+    }
+  }
+});
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -292,7 +327,58 @@ app.patch('/api/admin/orders/:id', (req, res) => {
   }
 });
 
-// Admin: Add Menu Item
+// Admin: Add Menu Item with Image Upload
+app.post('/api/admin/menu/add', upload.single('image'), (req, res) => {
+  if (!isValidAdmin(req)) {
+    if (req.file) {
+      fs.unlinkSync(req.file.path); // Delete uploaded file if auth fails
+    }
+    return res.status(401).json({ error: 'Unauthorized access.' });
+  }
+
+  const { name, category, price } = req.body;
+
+  if (!name || !category || !price || !req.file) {
+    if (req.file) {
+      fs.unlinkSync(req.file.path); // Delete uploaded file if validation fails
+    }
+    return res.status(400).json({ error: 'All fields are required (name, category, price, image).' });
+  }
+
+  const itemPrice = parseFloat(price);
+  if (isNaN(itemPrice) || itemPrice < 0) {
+    fs.unlinkSync(req.file.path);
+    return res.status(400).json({ error: 'Please provide a valid price.' });
+  }
+
+  try {
+    const db = getDb();
+    const imageFileName = req.file.filename;
+    
+    db.run('INSERT INTO menu (name, category, price, image) VALUES (?, ?, ?, ?)', 
+      [name, category, itemPrice, imageFileName]);
+
+    const resStmt = db.prepare('SELECT last_insert_rowid() AS id');
+    resStmt.step();
+    const newId = resStmt.getAsObject().id;
+    resStmt.free();
+
+    saveDatabase();
+    
+    res.status(201).json({ 
+      message: `${name} has been added to the menu successfully!`, 
+      id: newId,
+      image: imageFileName
+    });
+  } catch (err) {
+    if (req.file) {
+      fs.unlinkSync(req.file.path); // Delete uploaded file if DB insert fails
+    }
+    res.status(500).json({ error: err.message || 'Failed to add menu item.' });
+  }
+});
+
+// Admin: Add Menu Item (Legacy - without file upload)
 app.post('/api/admin/menu', (req, res) => {
   if (!isValidAdmin(req)) {
     return res.status(401).json({ error: 'Unauthorized access.' });

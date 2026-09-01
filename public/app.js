@@ -118,15 +118,22 @@ function renderMenu(items) {
 
   items.forEach(item => {
     const imageSrc = item.image ? `images/${item.image}` : fallbackImg;
+    
+    // Check if item is in cart and get quantity
+    const cartItem = cart.find(c => c.id === item.id);
+    const inCart = cartItem ? cartItem.quantity : 0;
 
     const card = document.createElement('div');
     card.className = 'card';
     card.innerHTML = `
       <img src="${imageSrc}" alt="${item.name}" onerror="this.src='${fallbackImg}'">
+      ${inCart > 0 ? `<div class="cart-badge">${inCart}</div>` : ''}
       <div class="card-info">
         <h3>${item.name}</h3>
         <p class="price">GH₵ ${item.price.toFixed(2)}</p>
-        <button class="add-cart-btn" onclick="addToCart(${item.id})">Add to Cart</button>
+        <button class="add-cart-btn" onclick="addToCart(${item.id})">
+          <i class="fa-solid fa-cart-plus"></i> Add to Cart
+        </button>
       </div>
     `;
     menuGrid.appendChild(card);
@@ -296,11 +303,33 @@ function addToCart(itemId) {
   }
 
   updateCartUI();
+  // Re-render menu to show cart badges
+  const activeCategory = document.querySelector('.filter-btn.active')?.innerText || 'All';
+  if (activeCategory === 'Foods') {
+    const filtered = allMenuItems.filter(item => item.category === 'Food');
+    renderMenu(filtered);
+  } else if (activeCategory === 'Drinks') {
+    const filtered = allMenuItems.filter(item => item.category === 'Drink');
+    renderMenu(filtered);
+  } else {
+    renderMenu(allMenuItems);
+  }
 }
 
 function removeFromCart(itemId) {
   cart = cart.filter(item => item.id !== itemId);
   updateCartUI();
+  // Re-render menu to remove cart badges
+  const activeCategory = document.querySelector('.filter-btn.active')?.innerText || 'All';
+  if (activeCategory === 'Foods') {
+    const filtered = allMenuItems.filter(item => item.category === 'Food');
+    renderMenu(filtered);
+  } else if (activeCategory === 'Drinks') {
+    const filtered = allMenuItems.filter(item => item.category === 'Drink');
+    renderMenu(filtered);
+  } else {
+    renderMenu(allMenuItems);
+  }
 }
 
 function updateCartUI() {

@@ -29,7 +29,42 @@
       <button onclick="window.location.href='/'" style="padding: 8px 16px; background: #2f3542; color: #fff; border: none; border-radius: 4px; cursor: pointer;">Go to Site</button>
     </div>
 
-   
+    <!-- Add New Menu Item -->
+    <div style="margin-bottom: 2rem; background: #fff; padding: 1.5rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+      <h3 style="margin-bottom: 1.2rem; color: #ff4757;">➕ Add New Food / Drink Item</h3>
+      <form id="add-menu-form" onsubmit="handleAddMenuItem(event)" enctype="multipart/form-data" style="display: grid; gap: 1rem;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div>
+            <label style="font-weight: 600; display: block; margin-bottom: 0.4rem;">Item Name:</label>
+            <input type="text" id="item-name" placeholder="e.g., Jollof Rice with Chicken" required style="width: 100%; padding: 0.6rem; border: 1px solid #ddd; border-radius: 4px;">
+          </div>
+          <div>
+            <label style="font-weight: 600; display: block; margin-bottom: 0.4rem;">Category:</label>
+            <select id="item-category" required style="width: 100%; padding: 0.6rem; border: 1px solid #ddd; border-radius: 4px;">
+              <option value="">-- Select Category --</option>
+              <option value="Food">Food</option>
+              <option value="Drink">Drink</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div>
+            <label style="font-weight: 600; display: block; margin-bottom: 0.4rem;">Price (GH₵):</label>
+            <input type="number" id="item-price" placeholder="e.g., 45.00" step="0.5" min="0" required style="width: 100%; padding: 0.6rem; border: 1px solid #ddd; border-radius: 4px;">
+          </div>
+          <div>
+            <label style="font-weight: 600; display: block; margin-bottom: 0.4rem;">Upload Image (JPG/PNG):</label>
+            <input type="file" id="item-image" accept="image/jpeg,image/png" required style="width: 100%; padding: 0.6rem; border: 1px solid #ddd; border-radius: 4px;">
+          </div>
+        </div>
+
+        <button type="submit" style="background: #2ed573; color: #fff; border: none; padding: 0.8rem; border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 0.95rem; margin-top: 0.5rem;">
+          ✅ Add Item to Menu
+        </button>
+      </form>
+      <div id="upload-status" style="margin-top: 1rem; padding: 0.8rem; border-radius: 4px; display: none;"></div>
+    </div>
 
     <!-- Manage Menu & Prices -->
     <div style="margin-bottom: 2rem;">

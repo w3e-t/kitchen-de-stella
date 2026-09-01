@@ -43,7 +43,6 @@ async function fetchAdminMenu() {
   }
 }
 
-// Save updated price to backend database
 async function updatePrice(itemId) {
   const priceInput = document.getElementById(`price-input-${itemId}`);
   const newPrice = parseFloat(priceInput.value);
@@ -72,6 +71,87 @@ async function updatePrice(itemId) {
     }
   } catch (err) {
     alert('Server error while updating price.');
+  }
+}
+
+// Handle adding new menu item with image upload
+async function handleAddMenuItem(event) {
+  event.preventDefault();
+  
+  const statusDiv = document.getElementById('upload-status');
+  statusDiv.style.display = 'block';
+  statusDiv.style.background = '#e8f5e9';
+  statusDiv.style.color = '#2e7d32';
+  statusDiv.innerText = '⏳ Uploading...';
+
+  const formData = new FormData();
+  const itemName = document.getElementById('item-name').value;
+  const itemCategory = document.getElementById('item-category').value;
+  const itemPrice = parseFloat(document.getElementById('item-price').value);
+  const itemImage = document.getElementById('item-image').files[0];
+
+  if (!itemImage) {
+    statusDiv.style.background = '#ffebee';
+    statusDiv.style.color = '#c62828';
+    statusDiv.innerText = '❌ Please select an image file.';
+    return;
+  }
+
+  // Validate image type
+  const validTypes = ['image/jpeg', 'image/png'];
+  if (!validTypes.includes(itemImage.type)) {
+    statusDiv.style.background = '#ffebee';
+    statusDiv.style.color = '#c62828';
+    statusDiv.innerText = '❌ Only JPG and PNG images are allowed.';
+    return;
+  }
+
+  // Validate image size (max 5MB)
+  if (itemImage.size > 5 * 1024 * 1024) {
+    statusDiv.style.background = '#ffebee';
+    statusDiv.style.color = '#c62828';
+    statusDiv.innerText = '❌ Image file must be smaller than 5MB.';
+    return;
+  }
+
+  formData.append('name', itemName);
+  formData.append('category', itemCategory);
+  formData.append('price', itemPrice);
+  formData.append('image', itemImage);
+
+  try {
+    const res = await fetch('/api/admin/menu/add', {
+      method: 'POST',
+      headers: {
+        'x-admin-passcode': getAdminPasscode()
+      },
+      body: formData
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      statusDiv.style.background = '#e8f5e9';
+      statusDiv.style.color = '#2e7d32';
+      statusDiv.innerText = `✅ ${data.message}`;
+      
+      document.getElementById('add-menu-form').reset();
+      fetchAdminMenu(); // Refresh the menu table
+      
+      // Clear success message after 3 seconds
+      setTimeout(() => {
+        statusDiv.style.display = 'none';
+      }, 3000);
+    } else {
+      statusDiv.style.background = '#ffebee';
+      statusDiv.style.color = '#c62828';
+      statusDiv.innerText = `❌ ${data.error || 'Failed to add item.'}`;
+    }
+  } catch (err) {
+    statusDiv.style.background = '#ffebee';
+    statusDiv.style.color = '#c62828';
+    statusDiv.innerText = '❌ Server error while adding item.';
+    console.error('Error:', err);
   }
 }
 
