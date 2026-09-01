@@ -105,30 +105,26 @@ html, body {
 
 /* Dark Mode Toggle Button */
 .dark-mode-toggle {
-  background: linear-gradient(135deg, #ff4757 0%, #ff6b7a 100%);
+  background: transparent;
   border: none;
-  color: #fff;
-  padding: 0.8rem 1.5rem;
-  border-radius: 25px;
+  color: var(--text-primary);
+  padding: 0.6rem 0.8rem;
+  border-radius: 8px;
   cursor: pointer;
   font-size: 0.95rem;
   font-weight: 600;
   transition: all 0.3s ease;
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 8px;
   white-space: nowrap;
-  box-shadow: 0 6px 20px rgba(255, 71, 87, 0.3);
+  width: 100%;
 }
 
-.dark-mode-toggle:hover {
-  background: linear-gradient(135deg, #ff6b7a 0%, #ff8490 100%);
-  transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(255, 71, 87, 0.4);
-}
-
-.dark-mode-toggle:active {
-  transform: translateY(-1px);
+.drawer-links .dark-mode-toggle:hover {
+  background: #ff4757;
+  color: #fff;
+  transform: translateX(5px);
 }
 
 /* Drawer Navigation Menu */
@@ -608,16 +604,6 @@ html, body {
 .branch-list li:hover {
   background: rgba(255, 71, 87, 0.1);
   padding-left: 1rem;
-}
-
-/* Dark Mode Section */
-.dark-mode-section {
-  background: var(--bg-tertiary);
-  padding: 2rem 4%;
-  text-align: center;
-  transition: background-color 0.3s ease;
-  border-top: 1px solid var(--border-color);
-  border-bottom: 1px solid var(--border-color);
 }
 
 /* Modal Overlay & Cart */

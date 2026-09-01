@@ -45,6 +45,12 @@
         <a href="#menu" onclick="toggleDrawer()"><i class="fa-solid fa-utensils"></i> Menu</a>
         <a href="#about" onclick="toggleDrawer()"><i class="fa-solid fa-circle-info"></i> About Us</a>
         
+        <!-- Dark Mode Toggle -->
+        <button class="dark-mode-toggle" id="darkModeBtn" onclick="toggleDarkMode();">
+          <i id="darkModeIcon" class="fa-solid fa-moon"></i>
+          <span id="darkModeText">Dark Mode</span>
+        </button>
+        
         <!-- Auth & Order links render here dynamically -->
         <div id="drawer-auth-container"></div>
       </nav>
@@ -107,14 +113,6 @@
         </ul>
       </div>
     </div>
-  </section>
-
-  <!-- Dark Mode Toggle Section -->
-  <section class="dark-mode-section">
-    <button class="dark-mode-toggle" id="darkModeBtn" onclick="toggleDarkMode();">
-      <i id="darkModeIcon" class="fa-solid fa-moon"></i>
-      <span id="darkModeText">Dark Mode</span>
-    </button>
   </section>
 
   <!-- Login / Register Modal -->
