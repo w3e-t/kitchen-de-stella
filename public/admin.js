@@ -3,6 +3,34 @@ document.addEventListener('DOMContentLoaded', () => {
   fetchAdminMenu();
 });
 
+/* Toggle Menu Section */
+function toggleMenuSection() {
+  const content = document.getElementById('menu-section-content');
+  const btn = event.target;
+  
+  if (content.classList.contains('hidden')) {
+    content.classList.remove('hidden');
+    btn.textContent = '−';
+  } else {
+    content.classList.add('hidden');
+    btn.textContent = '+';
+  }
+}
+
+/* Toggle Orders Section */
+function toggleOrdersSection() {
+  const content = document.getElementById('orders-section-content');
+  const btn = event.target;
+  
+  if (content.classList.contains('hidden')) {
+    content.classList.remove('hidden');
+    btn.textContent = '−';
+  } else {
+    content.classList.add('hidden');
+    btn.textContent = '+';
+  }
+}
+
 function getAdminPasscode() {
   // Checks 'adminPasscode' (matching app.js) or 'stella_user', fallback to 'Stella123'
   return localStorage.getItem('adminPasscode') || localStorage.getItem('admin_passcode') || 'Stella123';
