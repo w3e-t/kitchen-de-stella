@@ -2,6 +2,40 @@ let allMenuItems = [];
 let cart = [];
 let currentUser = JSON.parse(localStorage.getItem('stella_user')) || null;
 
+/* Dark Mode Toggle */
+function toggleDarkMode() {
+  const html = document.documentElement;
+  const darkModeBtn = document.getElementById('darkModeBtn');
+  const darkModeIcon = document.getElementById('darkModeIcon');
+  const darkModeText = document.getElementById('darkModeText');
+
+  if (html.classList.contains('dark-mode')) {
+    html.classList.remove('dark-mode');
+    localStorage.setItem('theme', 'light');
+    darkModeIcon.className = 'fa-solid fa-moon';
+    darkModeText.textContent = 'Dark Mode';
+  } else {
+    html.classList.add('dark-mode');
+    localStorage.setItem('theme', 'dark');
+    darkModeIcon.className = 'fa-solid fa-sun';
+    darkModeText.textContent = 'Light Mode';
+  }
+}
+
+// Load saved theme preference on page load
+function loadTheme() {
+  const savedTheme = localStorage.getItem('theme') || 'light';
+  const html = document.documentElement;
+  const darkModeIcon = document.getElementById('darkModeIcon');
+  const darkModeText = document.getElementById('darkModeText');
+
+  if (savedTheme === 'dark') {
+    html.classList.add('dark-mode');
+    darkModeIcon.className = 'fa-solid fa-sun';
+    darkModeText.textContent = 'Light Mode';
+  }
+}
+
 /* Opening Hours Helper Function */
 function isKitchenOpen() {
   const now = new Date();
@@ -11,6 +45,7 @@ function isKitchenOpen() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  loadTheme(); // Load theme preference on page load
   fetchMenu();
   updateAuthUI();
 
